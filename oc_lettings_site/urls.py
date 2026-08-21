@@ -1,3 +1,5 @@
+"""Root URL configuration for the OC Lettings site."""
+
 from django.contrib import admin
 from django.urls import include, path
 
