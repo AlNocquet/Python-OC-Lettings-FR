@@ -14,3 +14,13 @@ from django.shortcuts import render
 def index(request):
     """Display the site home page."""
     return render(request, 'index.html')
+
+
+def error_404(request, exception):
+    """Render the custom page-not-found response."""
+    return render(request, '404.html', status=404)
+
+
+def error_500(request):
+    """Render the custom internal-server-error response."""
+    return render(request, '500.html', status=500)
