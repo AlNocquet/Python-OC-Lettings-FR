@@ -1,3 +1,51 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import resolve, reverse
 
-# Create your tests here.
+from . import views
+from .models import Profile
+
+
+class ProfilesURLTests(TestCase):
+
+    def test_index_url_resolves_to_index_view(self):
+        url = reverse('profiles:index')
+
+        self.assertEqual(url, '/profiles/')
+        self.assertEqual(resolve(url).func, views.index)
+
+    def test_detail_url_resolves_to_profile_view(self):
+        url = reverse('profiles:profile', args=['TestUser'])
+
+        self.assertEqual(url, '/profiles/TestUser/')
+        self.assertEqual(resolve(url).func, views.profile)
+
+
+class ProfilesViewTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
+            username='TestUser',
+            password='test-password',
+        )
+        cls.profile = Profile.objects.create(
+            user=cls.user,
+            favorite_city='Paris',
+        )
+
+    def test_index_view_returns_200_and_uses_expected_template(self):
+        response = self.client.get(reverse('profiles:index'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'profiles/index.html')
+        self.assertContains(response, self.user.username)
+
+    def test_detail_view_returns_200_and_uses_expected_template(self):
+        response = self.client.get(
+            reverse('profiles:profile', args=[self.user.username])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'profiles/profile.html')
+        self.assertEqual(response.context['profile'], self.profile)
