@@ -1,8 +1,13 @@
 """Views for the lettings application."""
 
+import logging
+
 from django.shortcuts import render
 
 from .models import Letting
+
+
+logger = logging.getLogger(__name__)
 
 
 # Aenean leo magna, vestibulum et tincidunt fermentum, consectetur quis velit.
@@ -11,6 +16,7 @@ from .models import Letting
 # cubilia curae; Cras eget scelerisque
 def index(request):
     """Display the list of all lettings."""
+    logger.info("Lettings list requested.")
     lettings_list = Letting.objects.all()
     context = {'lettings_list': lettings_list}
     return render(request, 'lettings/index.html', context)
@@ -30,6 +36,7 @@ def index(request):
 # pulvinar sit amet.
 def letting(request, letting_id):
     """Display the details of a letting identified by its ID."""
+    logger.info("Letting detail requested.")
     letting = Letting.objects.get(id=letting_id)
     context = {
         'title': letting.title,
