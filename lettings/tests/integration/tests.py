@@ -3,8 +3,8 @@
 from django.test import TestCase
 from django.urls import resolve, reverse
 
-from . import views
-from .models import Address, Letting
+from lettings import views
+from lettings.models import Address, Letting
 
 
 class LettingsURLTests(TestCase):

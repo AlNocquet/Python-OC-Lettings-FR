@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import resolve, reverse
 
-from . import views
-from .models import Profile
+from profiles import views
+from profiles.models import Profile
 
 
 class ProfilesURLTests(TestCase):

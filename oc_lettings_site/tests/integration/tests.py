@@ -2,7 +2,7 @@
 
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
-from . import urls, views
+from oc_lettings_site import urls, views
 
 
 class ErrorPageTests(SimpleTestCase):
