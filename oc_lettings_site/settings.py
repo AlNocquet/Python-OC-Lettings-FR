@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +28,15 @@ ALLOWED_HOSTS = [
     for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
     if host.strip()
 ]
+
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+
+if SENTRY_DSN and not DEBUG:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        send_default_pii=False,
+    )
 
 
 # Application definition
