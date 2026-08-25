@@ -64,3 +64,16 @@ jobs:
           tags: |
             alnq/oc-lettings:${{ github.sha }}
             alnq/oc-lettings:latest
+
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Trigger Render deployment
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          IMAGE_URL: docker.io/alnq/oc-lettings:${{ github.sha }}
+        run: curl --fail --show-error --get --data-urlencode "imgURL=$IMAGE_URL" "$RENDER_DEPLOY_HOOK"
