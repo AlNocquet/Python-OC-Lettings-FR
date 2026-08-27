@@ -1,7 +1,10 @@
+"""Database migration for profiles."""
+
 from django.db import migrations
 
 
 def copy_existing_data(apps, schema_editor):
+    """Copy existing data into the refactored application."""
     db_alias = schema_editor.connection.alias
 
     LegacyProfile = apps.get_model('oc_lettings_site', 'Profile')
@@ -16,6 +19,7 @@ def copy_existing_data(apps, schema_editor):
 
 
 def reverse_existing_data(apps, schema_editor):
+    """Remove data copied by the forward migration."""
     db_alias = schema_editor.connection.alias
 
     LegacyProfile = apps.get_model('oc_lettings_site', 'Profile')
@@ -31,6 +35,7 @@ def reverse_existing_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    """Define the operations for this database migration."""
 
     dependencies = [
         ('oc_lettings_site', '0001_initial'),

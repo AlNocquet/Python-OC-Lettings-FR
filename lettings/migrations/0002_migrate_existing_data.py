@@ -1,7 +1,10 @@
+"""Database migration for lettings."""
+
 from django.db import migrations
 
 
 def copy_existing_data(apps, schema_editor):
+    """Copy existing data into the refactored application."""
     db_alias = schema_editor.connection.alias
 
     LegacyAddress = apps.get_model('oc_lettings_site', 'Address')
@@ -29,6 +32,7 @@ def copy_existing_data(apps, schema_editor):
 
 
 def reverse_existing_data(apps, schema_editor):
+    """Remove data copied by the forward migration."""
     db_alias = schema_editor.connection.alias
 
     LegacyAddress = apps.get_model('oc_lettings_site', 'Address')
@@ -54,6 +58,7 @@ def reverse_existing_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    """Define the operations for this database migration."""
 
     dependencies = [
         ('oc_lettings_site', '0001_initial'),
