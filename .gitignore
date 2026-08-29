@@ -7,3 +7,5 @@ htmlcov/
 coverage.xml
 .env
 .env.local
+
+docs/build/
