@@ -1,77 +1,218 @@
-## Résumé
+# Orange County Lettings
 
-Site web d'Orange County Lettings
+Application web Django de consultation de locations et de profils, refactorisée dans le cadre du Projet 13 OpenClassrooms.
 
-## Développement local
+Le projet réduit la dette technique de l'application existante, sépare les responsabilités métier en applications Django dédiées et industrialise les tests, la conteneurisation et le déploiement grâce à une chaîne CI/CD.
 
-### Prérequis
+## Liens
 
-- Compte GitHub avec accès en lecture à ce repository
-- Git CLI
-- SQLite3 CLI
-- Interpréteur Python, version 3.6 ou supérieure
+- Dépôt GitHub : https://github.com/AlNocquet/Python-OC-Lettings-FR
+- Pipeline GitHub Actions : https://github.com/AlNocquet/Python-OC-Lettings-FR/actions
+- Application en production : https://oc-lettings-9le6.onrender.com
+- Image Docker Hub : https://hub.docker.com/r/alnq/oc-lettings
+- Documentation Read the Docs : **à remplacer par l'URL publique après import du dépôt**
 
-Dans le reste de la documentation sur le développement local, il est supposé que la commande `python` de votre OS shell exécute l'interpréteur Python ci-dessus (à moins qu'un environnement virtuel ne soit activé).
+## Architecture
 
-### macOS / Linux
+Le projet comporte trois composants principaux :
 
-#### Cloner le repository
+- `oc_lettings_site` : configuration globale, accueil, routage principal et pages d'erreur ;
+- `lettings` : modèles `Address` et `Letting`, vues, URLs, templates et tests associés ;
+- `profiles` : modèle `Profile`, vues, URLs, templates et tests associés.
 
-- `cd /path/to/put/project/in`
-- `git clone https://github.com/OpenClassrooms-Student-Center/Python-OC-Lettings-FR.git`
+Les fichiers statiques communs restent dans `static/`. En production, `collectstatic` les rassemble dans `staticfiles/` et WhiteNoise les sert.
 
-#### Créer l'environnement virtuel
+## Prérequis
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `python -m venv venv`
-- `apt-get install python3-venv` (Si l'étape précédente comporte des erreurs avec un paquet non trouvé sur Ubuntu)
-- Activer l'environnement `source venv/bin/activate`
-- Confirmer que la commande `python` exécute l'interpréteur Python dans l'environnement virtuel
-`which python`
-- Confirmer que la version de l'interpréteur Python est la version 3.6 ou supérieure `python --version`
-- Confirmer que la commande `pip` exécute l'exécutable pip dans l'environnement virtuel, `which pip`
-- Pour désactiver l'environnement, `deactivate`
+- Python 3.10
+- Git
+- pip
+- Docker Desktop pour exécuter l'image Docker
 
-#### Exécuter le site
+## Installation locale
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `pip install --requirement requirements.txt`
-- `python manage.py runserver`
-- Aller sur `http://localhost:8000` dans un navigateur.
-- Confirmer que le site fonctionne et qu'il est possible de naviguer (vous devriez voir plusieurs profils et locations).
+```bash
+git clone https://github.com/AlNocquet/Python-OC-Lettings-FR.git
+cd Python-OC-Lettings-FR
+python -m venv venv
+```
 
-#### Linting
+Sous Windows PowerShell :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `flake8`
+```powershell
+.\venv\Scripts\Activate.ps1
+```
 
-#### Tests unitaires
+Sous macOS / Linux :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- `source venv/bin/activate`
-- `pytest`
+```bash
+source venv/bin/activate
+```
 
-#### Base de données
+Installer les dépendances :
 
-- `cd /path/to/Python-OC-Lettings-FR`
-- Ouvrir une session shell `sqlite3`
-- Se connecter à la base de données `.open oc-lettings-site.sqlite3`
-- Afficher les tables dans la base de données `.tables`
-- Afficher les colonnes dans le tableau des profils, `pragma table_info(Python-OC-Lettings-FR_profile);`
-- Lancer une requête sur la table des profils, `select user_id, favorite_city from
-  Python-OC-Lettings-FR_profile where favorite_city like 'B%';`
-- `.quit` pour quitter
+```bash
+pip install -r requirements.txt
+```
 
-#### Panel d'administration
+Créer `.env` à partir de `.env.example` :
 
-- Aller sur `http://localhost:8000/admin`
-- Connectez-vous avec un compte administrateur configure localement.
+```text
+DJANGO_SECRET_KEY=<clé-secrète-locale>
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+SENTRY_DSN=
+```
 
-### Windows
+Ne jamais versionner `.env`.
 
-Utilisation de PowerShell, comme ci-dessus sauf :
+Appliquer les migrations et lancer le site :
 
-- Pour activer l'environnement virtuel, `.\venv\Scripts\Activate.ps1` 
-- Remplacer `which <my-command>` par `(Get-Command <my-command>).Path`
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+
+Site : `http://localhost:8000`
+Admin : `http://localhost:8000/admin/`
+
+Utiliser un compte administrateur configuré localement. Aucun identifiant ou mot de passe ne doit être stocké dans le dépôt.
+
+## Contrôles qualité
+
+```bash
+python manage.py check
+flake8 .
+pytest
+coverage run -m pytest
+coverage report
+```
+
+Le seuil minimal de couverture est de 80 %.
+
+## Documentation Sphinx
+
+```bash
+pip install -r docs/requirements.txt
+```
+
+macOS / Linux :
+
+```bash
+cd docs
+make html
+```
+
+Windows PowerShell :
+
+```powershell
+cd docs
+.\make.bat html
+```
+
+La documentation est générée dans `docs/build/html/`.
+
+## Déploiement
+
+### Fonctionnement général
+
+```text
+Push GitHub
+    |
+    v
+CI : lint + tests + couverture
+    |
+    | master uniquement
+    v
+CD : build Docker
+    |
+    v
+Docker Hub
+    |
+    v
+Deploy hook Render
+    |
+    v
+Production
+```
+
+Sur toutes les branches, GitHub Actions exécute linting, tests et couverture.
+
+Sur `master` uniquement, si ces contrôles réussissent :
+
+1. construction de l'image Docker ;
+2. publication sur Docker Hub avec le SHA complet du commit et `latest` ;
+3. appel du deploy hook Render ;
+4. déploiement de l'image correspondant au SHA.
+
+### Configuration requise
+
+Secrets GitHub Actions :
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `RENDER_DEPLOY_HOOK`
+
+Variables Render :
+
+```text
+DJANGO_SECRET_KEY=<secret>
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=<nom-hôte-render>
+SENTRY_DSN=<dsn-sentry>
+PORT=8000
+```
+
+Les secrets ne doivent jamais être inscrits dans le dépôt.
+
+### Docker
+
+Le conteneur applique les migrations, collecte les statiques et démarre Gunicorn sur le port 8000.
+
+```bash
+docker pull alnq/oc-lettings:latest
+docker run --rm --env-file .env -p 8000:8000 alnq/oc-lettings:latest
+```
+
+Pour reproduire une version précise, utiliser le tag SHA du commit.
+
+### Fichiers statiques
+
+`collectstatic` rassemble les ressources dans `STATIC_ROOT`, puis WhiteNoise les sert en production. Le site et l'admin doivent conserver le même rendu qu'en local.
+
+### Base de données
+
+Le projet utilise SQLite. Les migrations sont exécutées au démarrage du conteneur.
+
+Sur un hébergement dont le système de fichiers est éphémère, les modifications de données réalisées en production ne sont pas garanties après redéploiement. Une base externe persistante serait préférable pour une application de production durable.
+
+### Journalisation et Sentry
+
+Django journalise les événements applicatifs pour `oc_lettings_site`, `lettings` et `profiles`.
+
+Sentry est initialisé lorsque `SENTRY_DSN` est défini et que `DEBUG=False`. `send_default_pii=False` évite l'envoi de données personnelles par défaut.
+
+### Vérification après déploiement
+
+Vérifier :
+
+1. les jobs GitHub Actions ;
+2. l'état `Live` sur Render ;
+3. la page d'accueil ;
+4. `/admin/` ;
+5. les fichiers statiques ;
+6. Sentry en cas de test d'erreur.
+
+## Read the Docs
+
+Après import du dépôt GitHub dans Read the Docs :
+
+1. utiliser `.readthedocs.yaml` ;
+2. lancer le premier build ;
+3. vérifier l'URL publique ;
+4. vérifier qu'un nouveau push déclenche automatiquement un nouveau build ;
+5. remplacer le placeholder Read the Docs dans ce README par l'URL publique.
+
+## Contexte
+
+Projet réalisé dans le cadre du parcours OpenClassrooms.
