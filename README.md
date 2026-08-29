@@ -10,7 +10,7 @@ Le projet réduit la dette technique de l'application existante, sépare les res
 - Pipeline GitHub Actions : https://github.com/AlNocquet/Python-OC-Lettings-FR/actions
 - Application en production : https://oc-lettings-9le6.onrender.com
 - Image Docker Hub : https://hub.docker.com/r/alnq/oc-lettings
-- Documentation Read the Docs : **à remplacer par l'URL publique après import du dépôt**
+- Documentation Read the Docs : https://python-oc-lettings-fr-alnocquet.readthedocs.io/fr/latest/
 
 ## Architecture
 
